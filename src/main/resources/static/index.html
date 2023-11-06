@@ -96,7 +96,7 @@
             const response = await fetch('/api/BBS');
             const data = await response.json();
             const listContainer = document.getElementById('bbsList');
-            listContainer.innerHTML = ''; // 기존 목록을 비웁니다.
+            listContainer.innerHTML = '';
             data.forEach(bbs => {
                 const item = document.createElement('div');
                 item.textContent = `제목: ${bbs.title}, 작성자: ${bbs.userName}, 내용: ${bbs.contents}, 작성일: ${bbs.date}`;
@@ -104,8 +104,72 @@
             });
         }
 
-        // 페이지 로딩 시 게시글 목록을 가져옵니다.
+        async function updateBBS(id) {
+            const title = prompt("제목을 입력하세요:", "");
+            const userName = prompt("작성자명을 입력하세요:", "");
+            const contents = prompt("내용을 입력하세요:", "");
+            const password = prompt("비밀번호를 입력하세요:", "");
+
+            if (title && userName && contents && password) {
+                const response = await fetch(`/api/BBS/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, userName, contents, password })
+                });
+                if (response.ok) {
+                    alert('게시글이 업데이트되었습니다.');
+                    getBBS();
+                } else {
+                    alert('업데이트 실패. 비밀번호를 확인해 주세요.');
+                }
+            }
+        }
+
+        async function deleteBBS(id) {
+            const password = prompt("비밀번호를 입력하세요:", "");
+            if (password) {
+                const response = await fetch(`/api/BBS/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                if (response.ok) {
+                    alert('게시글이 삭제되었습니다.');
+                    getBBS();
+                } else {
+                    alert('삭제 실패. 비밀번호를 확인해 주세요.');
+                }
+            }
+        }
+
+        // 수정된 getBBS 함수
+        async function getBBS() {
+            const response = await fetch('/api/BBS');
+            const data = await response.json();
+            const listContainer = document.getElementById('bbsList');
+            listContainer.innerHTML = '';
+            data.forEach(bbs => {
+                const item = document.createElement('div');
+                item.classList.add('bbs-item');
+                item.innerHTML = `
+                    <strong>제목:</strong> ${bbs.title} <br>
+                    <strong>작성자:</strong> ${bbs.userName} <br>
+                    <strong>내용:</strong> ${bbs.contents} <br>
+                    <strong>작성일:</strong> ${bbs.date} <br>
+                    <button onclick="updateBBS(${bbs.id})">수정</button>
+                    <button onclick="deleteBBS(${bbs.id})">삭제</button>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
         window.onload = getBBS;
+
+
     </script>
 </head>
 <body>
