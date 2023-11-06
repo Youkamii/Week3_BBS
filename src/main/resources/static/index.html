@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type=text], input[type=password], textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #5cb85c;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #4cae4c;
+        }
+
+        .bbs-list {
+            margin-top: 20px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .bbs-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+
+        .bbs-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+
+    <script>
+        async function submitForm(event) {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const userName = document.getElementById('userName').value;
+            const contents = document.getElementById('contents').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/api/BBS', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, userName, contents, password })
+            });
+            const data = await response.json();
+            console.log(data);
+            alert('게시글이 등록되었습니다.');
+            getBBS();
+        }
+
+        async function getBBS() {
+            const response = await fetch('/api/BBS');
+            const data = await response.json();
+            const listContainer = document.getElementById('bbsList');
+            listContainer.innerHTML = ''; // 기존 목록을 비웁니다.
+            data.forEach(bbs => {
+                const item = document.createElement('div');
+                item.textContent = `제목: ${bbs.title}, 작성자: ${bbs.userName}, 내용: ${bbs.contents}, 작성일: ${bbs.date}`;
+                listContainer.appendChild(item);
+            });
+        }
+
+        // 페이지 로딩 시 게시글 목록을 가져옵니다.
+        window.onload = getBBS;
+    </script>
+</head>
+<body>
+<h1>게시판</h1>
+<form onsubmit="submitForm(event)">
+    <input type="text" id="title" placeholder="제목" required /><br>
+    <input type="text" id="userName" placeholder="작성자명" required /><br>
+    <input type="password" id="password" placeholder="비밀번호" required /><br>
+    <textarea id="contents" placeholder="내용" required></textarea><br>
+    <button type="submit">게시글 등록</button>
+</form>
+<hr>
+<div id="bbsList"></div>
+</body>
+</html>
